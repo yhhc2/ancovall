@@ -32,7 +32,7 @@ are met.
 }
 \details{
 Homogeneity of slopes and homogeneity of variance are both checked. If the
-p-value is significant for the interaction terms of Levene's test, then
+p-value is significant for any of the interaction terms or Levene's test, then
 this means the assumptions are not met.
 }
 \examples{

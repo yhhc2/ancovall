@@ -169,7 +169,7 @@ HomogeneityOfVariance <- function(inputted.data, dependent.variable,
 #' are met.
 #'
 #' Homogeneity of slopes and homogeneity of variance are both checked. If the
-#' p-value is significant for the interaction terms of Levene's test, then
+#' p-value is significant for any of the interaction terms or Levene's test, then
 #' this means the assumptions are not met.
 #'
 #'
@@ -596,3 +596,65 @@ ANCOVAWithFormattedOutput <- function(inputted.data, dependent.variable,
 
 }
 
+
+#' Checks ANCOVA assumptions and runs ANCOVA
+#'
+#' The homogeneity of slopes and variance assumptions are checked
+#' Normality of residual distribution is not checked. ANCOVA is then
+#' performed with all covariates and repeated with only covariates that
+#' are significant.
+#'
+#'
+#' Homogeneity of slopes and homogeneity of variance are both checked. If the
+#' p-value is significant for any of the interaction terms or Levene's test, then
+#' this means the assumptions are not met.
+#'
+#' ANCOVA computation is performed 3 ways:
+#' 1. Using independent variable and all covariates.
+#' 2. Using independent variable and only covariates with p-value <0.05 as determined by method 1.
+#' 3. Using independent variable and/or covariates only if they are selected by AIC.
+#'
+#'
+#'
+#' @param inputted.data A dataframe
+#' @param dependent.variable A string that specifies the column name of the column to use as the dependent variable. Column must be numeric.
+#' @param independent.variable A string that specifies the column name of the column to use as the independent variable. Column can be numeric or factor. If it's a factor, then it can only have two levels.
+#' @param covariates A vector of strings that specifies the columns names of the columns to be used as covariates. Columns can be numeric or factor.  If it's a factor, then it can only have two levels.
+#'
+#'
+#' @return A matrix with two rows. The first row specifies what the values are in the second row. The second row:
+#'
+#' The first element is the formula used to evaluate p-value of interaction terms. The next elements are
+#' the p-values for each interaction term. Following the p-value for interaction terms is the formula used to
+#' evaluate Levene test. The next element is the p-value from the Levene test.
+#'
+#' The next element is the formula used to evaluate ANCOVA with all covariates. The elements that are between
+#' this formula and the next formula are the p-values for each variable. The element that comes next is the
+#' formula that only includes significant covariates along with the independent variable. The elements that
+#' are between this formula and the next formula are the p-values for each variable after doing ANCOVA with only variables
+#' with coefficient that have p-value <0.05. The element that comes next
+#' is the formula that only includes significant covariates (determined by AIC), and independent variable is only
+#' included if it's determined to be significant by AIC. The following elements are the p-values for the variables
+#' after doing ANCOVA with only the variables determined to be significant by AIC.
+#'
+#'
+#'
+#' @export
+#'
+#' @examples
+ANCOVACheckedAssumptionsAndResults <- function(inputted.data, dependent.variable,
+                                               independent.variable, covariates){
+
+  assumption.res <- CheckAllAssumptionsANCOVA(inputted.data, dependent.variable,
+                                              independent.variable, covariates)
+
+  computation.res <- ANCOVAWithFormattedOutput(inputted.data, dependent.variable,
+                                               independent.variable, covariates)[[1]]
+
+
+  combined.res <- cbind(assumption.res, computation.res)
+
+  return(combined.res)
+
+
+}

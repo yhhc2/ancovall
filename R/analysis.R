@@ -122,7 +122,7 @@ HomogeneityOfRegressionSlopes <- function(inputted.data, dependent.variable,
 #' @param independent.variable A string that specifies the column name of the column to use as the independent variable. Column can be numeric or factor. If it's a factor, then it can only have two levels.
 #'
 #' @return A matrix with two rows. The first row specify what the values are in the second row. The second row:
-#' The first element is the formula used to evaluate levene test. The next element is the p-value from the levene test.
+#' The first element is the formula used to evaluate Levene test. The next element is the p-value from the Levene test.
 #'
 #' @export
 #'
@@ -163,4 +163,66 @@ HomogeneityOfVariance <- function(inputted.data, dependent.variable,
 
 }
 
+#' Checks assumptions for ANOVA/ANCOVA
+#'
+#' Returns information that can be used to determine if assumptions for ANCOVA
+#' are met.
+#'
+#' Homogeneity of slopes and homogeneity of variance are both checked. If the
+#' p-value is significant for the interaction terms of Levene's test, then
+#' this means the assumptions are not met.
+#'
+#'
+#' @param inputted.data A dataframe
+#' @param dependent.variable A string that specifies the column name of the column to use as the dependent variable. Column must be numeric.
+#' @param independent.variable A string that specifies the column name of the column to use as the independent variable. Column can be numeric or factor. If it's a factor, then it can only have two levels.
+#' @param covariates A vector of strings that specifies the columns names of the columns to be used as covariates. Columns can be numeric or factor.  If it's a factor, then it can only have two levels.
+#'
+#' @return A matrix with two rows. The first row specify what the values are in the second row. The second row:
+#' The first element is the formula used to evaluate p-value of interaction terms. The next elements are
+#' the p-values for each interaction term. Following the p-value for interaction terms is the formula used to
+#' evaluate Levene test. The next element is the p-value from the Levene test.
+#'
+#' @export
+#'
+#' @examples
+#'
+#' dependent.col <- c(10.1, 11.3, 12.1, 13.7, 14.2, 1.6, 2.3, 3.2, 4.1, 5.3)
+#' independent.col <- as.factor(c(1, 1, 1, 1, 1, 0, 0, 0, 0, 0))
+#' covariate.one.col <- c(1, 2, 3, 4, 5, 1, 2, 3, 4, 5)
+#' covariate.two.col <- as.factor(c(1, 0, 1, 0, 1, 0, 1, 0, 1, 0))
+#'
+#' inputted.data <- data.frame(dependent.col, independent.col, covariate.one.col,
+#'                             covariate.two.col)
+#'
+#' results <- CheckAllAssumptionsANCOVA(inputted.data, "dependent.col",
+#'                                          "independent.col",
+#'                                          c("covariate.one.col", "covariate.two.col"))
+#'
+#' results
+#'
+#'
+CheckAllAssumptionsANCOVA <- function(inputted.data, dependent.variable,
+                                      independent.variable, covariates){
+
+  #Also check for outliers
+  #Also check for normality of dependent variable
+
+  #Testing conditions
+  # inputted.data <- working.data
+  # dependent.variable <- "Left_Lateral_Ventricle"
+  # independent.variable <- "HIV"
+  # covariates <- c("AGE", "GENDER")
+
+  regression.slopes.res <- HomogeneityOfRegressionSlopes(inputted.data, dependent.variable,
+                                                         independent.variable, covariates)
+
+  variance.res <- HomogeneityOfVariance(inputted.data, dependent.variable,
+                                        independent.variable)
+
+  combined.res <- cbind(regression.slopes.res, variance.res)
+
+  return(combined.res)
+
+}
 

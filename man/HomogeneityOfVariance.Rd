@@ -15,7 +15,7 @@ HomogeneityOfVariance(inputted.data, dependent.variable, independent.variable)
 }
 \value{
 A matrix with two rows. The first row specify what the values are in the second row. The second row:
-The first element is the formula used to evaluate levene test. The next element is the p-value from the levene test.
+The first element is the formula used to evaluate Levene test. The next element is the p-value from the Levene test.
 }
 \description{
 Returns information that can be used

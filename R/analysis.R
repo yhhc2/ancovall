@@ -170,7 +170,9 @@ HomogeneityOfVariance <- function(inputted.data, dependent.variable,
 #'
 #' Homogeneity of slopes and homogeneity of variance are both checked. If the
 #' p-value is significant for any of the interaction terms or Levene's test, then
-#' this means the assumptions are not met.
+#' this means the assumptions are not met. HomogeneityOfVariance() and
+#' HomogeneityOfRegressionSlopes() functions are both used in the function
+#' implementation.
 #'
 #'
 #' @param inputted.data A dataframe
@@ -607,13 +609,13 @@ ANCOVAWithFormattedOutput <- function(inputted.data, dependent.variable,
 #'
 #' Homogeneity of slopes and homogeneity of variance are both checked. If the
 #' p-value is significant for any of the interaction terms or Levene's test, then
-#' this means the assumptions are not met.
+#' this means the assumptions are not met. This is done using the
+#' CheckAllAssumptionsANCOVA() function.
 #'
-#' ANCOVA computation is performed 3 ways:
+#' ANCOVA computation is performed 3 ways by the ANCOVAWithFormattedOutput() function:
 #' 1. Using independent variable and all covariates.
 #' 2. Using independent variable and only covariates with p-value <0.05 as determined by method 1.
 #' 3. Using independent variable and/or covariates only if they are selected by AIC.
-#'
 #'
 #'
 #' @param inputted.data A dataframe
@@ -642,6 +644,19 @@ ANCOVAWithFormattedOutput <- function(inputted.data, dependent.variable,
 #' @export
 #'
 #' @examples
+#'
+#' dependent.col <- c(10.1, 11.3, 12.1, 13.7, 14.2, 1.6, 2.3, 3.2, 4.1, 5.3)
+#' independent.col <- as.factor(c(1, 1, 1, 1, 1, 0, 0, 0, 0, 0))
+#' covariate.one.col <- c(1, 2, 3, 4, 5, 1, 2, 3, 4, 5)
+#' covariate.two.col <- as.factor(c(1, 0, 1, 0, 1, 0, 1, 0, 1, 0))
+#'
+#' inputted.data <- data.frame(dependent.col, independent.col, covariate.one.col,
+#'                             covariate.two.col)
+#'
+#' results <- ANCOVACheckedAssumptionsAndResults(inputted.data, "dependent.col",
+#'                                          "independent.col",
+#'                                          c("covariate.one.col", "covariate.two.col"))
+#'
 ANCOVACheckedAssumptionsAndResults <- function(inputted.data, dependent.variable,
                                                independent.variable, covariates){
 
@@ -658,3 +673,93 @@ ANCOVACheckedAssumptionsAndResults <- function(inputted.data, dependent.variable
 
 
 }
+
+
+#' Checks ANCOVA assumptions, runs ANCOVA, and returns covariate(s) adjusted data values
+#'
+#' The homogeneity of slopes and variance assumptions are checked
+#' Normality of residual distribution is not checked. ANCOVA is then
+#' performed with all covariates and repeated with only covariates that
+#' are significant. The covariate(s) adjusted data values are also returned.
+#'
+#'
+#' Homogeneity of slopes and homogeneity of variance are both checked. If the
+#' p-value is significant for any of the interaction terms or Levene's test, then
+#' this means the assumptions are not met. This is done using the
+#' CheckAllAssumptionsANCOVA() function.
+#'
+#' ANCOVA computation is performed 3 ways by the ANCOVAWithFormattedOutput() function:
+#' 1. Using independent variable and all covariates.
+#' 2. Using independent variable and only covariates with p-value <0.05 as determined by method 1.
+#' 3. Using independent variable and/or covariates only if they are selected by AIC.
+#'
+#'
+#' @param inputted.data A dataframe
+#' @param dependent.variable A string that specifies the column name of the column to use as the dependent variable. Column must be numeric.
+#' @param independent.variable A string that specifies the column name of the column to use as the independent variable. Column can be numeric or factor. If it's a factor, then it can only have two levels.
+#' @param covariates A vector of strings that specifies the columns names of the columns to be used as covariates. Columns can be numeric or factor.  If it's a factor, then it can only have two levels.
+#'
+#'
+#' @return A list with two objects.
+#'
+#' The first object is a matrix with two rows. The first row specifies what the values are in the second row. The second row:
+#'
+#' The first element is the formula used to evaluate p-value of interaction terms. The next elements are
+#' the p-values for each interaction term. Following the p-value for interaction terms is the formula used to
+#' evaluate Levene test. The next element is the p-value from the Levene test.
+#'
+#' The next element is the formula used to evaluate ANCOVA with all covariates. The elements that are between
+#' this formula and the next formula are the p-values for each variable. The element that comes next is the
+#' formula that only includes significant covariates along with the independent variable. The elements that
+#' are between this formula and the next formula are the p-values for each variable after doing ANCOVA with only variables
+#' with coefficient that have p-value <0.05. The element that comes next
+#' is the formula that only includes significant covariates (determined by AIC), and independent variable is only
+#' included if it's determined to be significant by AIC. The following elements are the p-values for the variables
+#' after doing ANCOVA with only the variables determined to be significant by AIC.
+#'
+#'
+#' The second object is a vector containing the dependent variable values corrected for covariates determined
+#' to be significant by AIC. Example:
+#' For a sample with a specified gender and age, if you want to get the
+#' predicted value from the observed value after adjusting for gender and age,
+#' then thus this formula:
+#' PredictedVal =  ObservedVal - GlobalMean - (GenderCoefficient * gender) - (AgeCoefficient * age)
+#'
+#'
+#'
+#'
+#' @export
+#'
+#' @examples
+#'
+#' dependent.col <- c(10.1, 11.3, 12.1, 13.7, 14.2, 1.6, 2.3, 3.2, 4.1, 5.3)
+#' independent.col <- as.factor(c(1, 1, 1, 1, 1, 0, 0, 0, 0, 0))
+#' covariate.one.col <- c(1, 2, 3, 4, 5, 1, 2, 3, 4, 5)
+#' covariate.two.col <- as.factor(c(1, 0, 1, 0, 1, 0, 1, 0, 1, 0))
+#'
+#' inputted.data <- data.frame(dependent.col, independent.col, covariate.one.col,
+#'                             covariate.two.col)
+#'
+#' results <- ANCOVACheckedAssumptionsAndResults(inputted.data, "dependent.col",
+#'                                          "independent.col",
+#'                                          c("covariate.one.col", "covariate.two.col"))
+#'
+ANCOVACheckedAssumptionsAndResults_WithAdjustedData <- function(inputted.data, dependent.variable,
+                                                                independent.variable, covariates){
+
+  assumption.res <- CheckAllAssumptionsANCOVA(inputted.data, dependent.variable,
+                                              independent.variable, covariates)
+
+  computation.res <- ANCOVAWithFormattedOutput(inputted.data, dependent.variable,
+                                               independent.variable, covariates)
+
+
+  combined.res <- cbind(assumption.res, computation.res[[1]])
+
+  output <- list(combined.res, computation.res[[2]])
+
+  return(output)
+
+
+}
+

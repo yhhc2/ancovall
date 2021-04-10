@@ -33,7 +33,9 @@ are met.
 \details{
 Homogeneity of slopes and homogeneity of variance are both checked. If the
 p-value is significant for any of the interaction terms or Levene's test, then
-this means the assumptions are not met.
+this means the assumptions are not met. HomogeneityOfVariance() and
+HomogeneityOfRegressionSlopes() functions are both used in the function
+implementation.
 }
 \examples{
 
